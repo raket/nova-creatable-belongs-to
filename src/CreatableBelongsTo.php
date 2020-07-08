@@ -144,15 +144,18 @@ class CreatableBelongsTo extends BelongsTo
 
     public function fill(NovaRequest $request, $model)
     {
-        $relatedModel = forward_static_call(
-            [$this->resourceClass, 'newModel']
-        );
-
-        $relatedModel = $relatedModel::firstOrCreate([
-            $this->nameAttribute => $request->{$this->attribute},
-        ]);
-
-        $model->{$model->{$this->attribute}()->getForeignKeyName()} = $relatedModel->getKey();
+        $attribute = $request->{$this->attribute};
+        if ($attribute !== null) {
+            $relatedModel = forward_static_call(
+                [$this->resourceClass, 'newModel']
+            );
+    
+            $relatedModel = $relatedModel::firstOrCreate([
+                $this->nameAttribute => $request->{$this->attribute},
+            ]);
+    
+            $model->{$model->{$this->attribute}()->getForeignKeyName()} = $relatedModel->getKey();
+        }
 
         if ($this->filledCallback) {
             call_user_func($this->filledCallback, $request, $model);
